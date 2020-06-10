@@ -1,0 +1,46 @@
+Redis加减操作命令
+Incr——加
+Decr——减
+Incrby——阶梯加
+Decrby——阶梯减
+
+注意
+必须是数字，才可以进行加减
+
+清除redis数据库所有表数据:
+FLUSHALL
+
+清除 redis数据库当前表数据:
+FLUSHdb
+
+1. 发送短信 云平台
+2. redis文档
+3. 图片服务
+    1) 保存到程序本地, 扩容(磁盘满的问题)
+    2) 本地被销毁的问题---备份的问题
+    3) 多机(地)存储的问题
+    4)  用户A -- 图片A
+        用户B -- 图片B
+        图片A与图片B是同一份资源, 同样一份资源, 只是名字不一样, 浪费了磁盘空间
+    5) 用户A   a.jpg
+       用户B   a.jpg  同名图片, 但不同内容, 后上传的会覆盖之前的内容
+
+辨识是否同一个图片, md5 sha1算法得到哈希值 (asfwqrn12)  二进制辨识
+
+文件储存解决方案:
+    1) 自己用服务器搭建文件储存文件  电商网站FastDFS (快速分布式文件存储系统), HDFS Hadoop(分布式文件系统) 解决各种文件, 无论大小
+    2) 第三方服务  国内(七牛云存储--按访问量收费)
+
+账号:   1373816972@qq.com
+弱密码:  YING123ZZ
+文档: https://portal.qiniu.com/kodo/bucket/overview?bucketName=flask-ihome-python65
+
+
+API练习:
+编写 1. 设置身份证 api
+    2. 修改用户名 api
+
+
+前端JS模板  需要翻墙打开
+# https://aui.github.io/art-template/zh-cn/index.html
+需要引入js文件才能使用 # <script src="/static/js/template.js"></script>
