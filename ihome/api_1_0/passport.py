@@ -57,12 +57,13 @@ def register():
 	if real_sms_txt is None:
 		return jsonify(error_num=RET.NODATA, errmsg="短信验证码过期")
 	
-	# 删除redis中的短信验证码, 防止校验失败后的重复校验
-	# try:
-	# 	redis_store.delete("sms_code_%s" % mobile)
-	# except Exception as e:
-	# 	logging.error("短信验证码删除失败")
-	# 	logging.error(e)
+	if constants.MSG_CODE_True_OR_False is False:
+		# 删除redis中的短信验证码, 防止校验失败后的重复校验 这里我不删除, 短信可以重复利用
+		try:
+			redis_store.delete("sms_code_%s" % mobile)
+		except Exception as e:
+			logging.error("短信验证码删除失败")
+			logging.error(e)
 	
 	# 判断用户填写的短信验证码的正确性
 	# print("->"*10, type(real_sms_txt), real_sms_txt, type(sms_code), sms_code)
