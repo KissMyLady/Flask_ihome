@@ -255,7 +255,6 @@ def get_house_info():
 		# logging.info(req_data.decode("utf-8"))
 		req_data = req_data.decode("utf-8")
 		req = '{"errno":0, "errmsg":"OK", "data":%s}' % req_data, 200, {"Content-Type": "application/json"}
-		print("req: ", req)
 		return req
 
 	else:
@@ -291,7 +290,6 @@ def get_house_info():
 		
 	# return jsonify(errno=RET.OK, errmsg="OK", data={"data":json_houses}) 耗时
 	req2 = '{"errno"=0, "errmsg"="OK", "data":%s}' % json_houses, 200, {"Content-Type": "application/json"}
-	print("req2: ", req2)
 	return req2
 
 
@@ -320,13 +318,11 @@ def get_house_detail(house_id):
 		ret = ret.decode("utf-8")
 		resp = '{"errno"="0", errmsg="OK", "data":{"user_id":%s, "house":%s}}' % (user_id, ret), 200,{
 			"Content-Type": "application/json"}
-		print("resp2: ", resp)
 		return resp
 	
 	# redis没有数据, 查询数据库
 	try:
 		house = House.query.get(house_id)  # 查询是不是房东在访问
-		print("house: ", house)
 	except Exception as e:
 		logging.error("数据库查询用户登录信息错误")
 		return jsonify(errno=RET.DBERR, errmsg="查询错误")
@@ -348,24 +344,23 @@ def get_house_detail(house_id):
 	
 	# 前端判断, user_id 与 house_id 是不是同一个
 	resp = '{"errno":"0", errmsg:"OK", "data":{"user_id":%s, "house":%s}}' % (user_id, json_house), 200, {"Content-Type": "application/json"}
-	print("resp1: ", resp)
 	return resp
 
 
 # 房屋搜索页面
 # GET /api/v1.0/houses?sd=2017-12-01&ed=2017-12-31&aid=10&sk=new&p=1
-@api_1_0.route("/house")
+@api_1_0.route("/house/search")
 def search_house():
 	logging = Use_Loggin()
-	# 获取参数
-	start_date = request.args.get("sd", "")  # 用户想要的起始时间
-	end_date = request.args.get("ed", "")    # 结束时间
-	area_id = request.args.get("aid", "")    # 区域编号
-	sort_key = request.args.get("ks", "new")  # 排序关键字
-	page = request.args.get("p")  # 页数
 	
-	if not all([start_date, end_date, area_id, sort_key, page]):
-		return jsonify(errno=RET.PARAMERR, errmsg="参数不完整")
+	# 获取参数, 可有可无
+	start_date = request.args.get(key="sd", default="")   # 用户想要的起始时间
+	end_date = request.args.get(key="ed", default="")     # 结束时间
+	area_id = request.args.get(key="aid", default="")     # 区域编号
+	sort_key = request.args.get(key="ks", default="new")  # 排序关键字
+	page = request.args.get(key="p", default="")  # 页数
+	
+	# 因为参数可传可不传, 所以这里参数校验没必要
 	
 	try:
 		if start_date:
@@ -376,15 +371,23 @@ def search_house():
 		
 		if start_date and end_date:
 			assert end_date <= start_date
+			
 	except Exception as e:
 		return jsonify(errno=RET.PARAMERR, errmsg="日期输入有误")
 	
+	# 区域判断
+	try:
+		areas = Area.query.get(area_id)
+	except Exception as e:
+		return jsonify(errno=RET.PARAMERR, errmsg="区域信息有误")
+
 	# 处理页数
 	try:
 		page = int(page)
 	except Exception as e:
 		page = 1
-		
+	
+	# 查询数据库
 	# 获取缓存数据
 	redis_key = "house_%s_%s_%s_%s" % (start_date, end_date, area_id, sort_key)
 	try:
@@ -397,20 +400,19 @@ def search_house():
 			return resp_json, 200, {"Content-Type": "application/json"}
 	
 	# 过滤条件的参数列表容器
-	filter_params = []
+	filter_params = list()
 	
-	# 填充过滤参数
-	# 时间条件
+	# 形成参数:　填充过滤参数　时间条件
 	conflict_orders = None
-	
 	try:
 		if start_date and end_date:
-			# 查询冲突的订单
+			# 查询冲突的订单　　
 			conflict_orders = Order.query.filter(Order.begin_date <= end_date, Order.end_date >= start_date).all()
 		elif start_date:
 			conflict_orders = Order.query.filter(Order.end_date >= start_date).all()
 		elif end_date:
 			conflict_orders = Order.query.filter(Order.begin_date <= end_date).all()
+			
 	except Exception as e:
 		logging.error("Order数据库查询错误")
 		return jsonify(errno=RET.DBERR, errmsg="数据库异常")
@@ -425,8 +427,9 @@ def search_house():
 	
 	# 区域条件
 	if area_id:
+		# 放进去的是表达式: __eq__()方法的执行
 		filter_params.append(House.area_id == area_id)
-	
+		
 	# 查询数据库
 	# 补充排序条件
 	if sort_key == "booking":  # 入住做多
@@ -450,7 +453,7 @@ def search_house():
 	house_li = page_obj.items
 	houses = []
 	for house in house_li:
-		houses.append(house.to_basic_dict())
+		houses.append(house.to_base_dict())
 	
 	# 获取总页数
 	total_page = page_obj.pages
@@ -458,8 +461,8 @@ def search_house():
 	resp_dict = dict(errno=RET.OK, errmsg="OK",
 	                 data={"total_page": total_page,
 	                       "houses": houses,
-	                       "current_page":page})
-	
+	                       "current_page": page})
+								
 	resp_json = json.dumps(resp_dict)
 	
 	if page <= total_page:
@@ -485,5 +488,4 @@ def search_house():
 			logging.error("redis设置错误")
 			
 	return resp_json, 200, {"Content-Type": "application/json"}
-
 
