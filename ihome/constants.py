@@ -14,6 +14,9 @@ MSG_CODE_REDIS_EXPIES = 300
 # 短信发送间隔时间
 MSG_CODE_LONG_EXPIES = 60
 
+# 在注册时,短信是否可以重复验证
+MSG_CODE_True_OR_False = True
+
 # 登录--密码错过多误限制时间输入间隔
 # 错误次数
 LOGIN_MUNS_COUNTS = 5
@@ -47,8 +50,17 @@ HOME_PAGE_MAX_HOUSES = 5
 # 房屋主页--redis缓存失效时间
 HOME_PATH_REDIS_CACHE_EXPIRES = 7200
 
-# 房屋搜索列表缓存时间
+# 房屋搜索列表页面, 页面缓存时间 单位: 秒
 HOUES_LIST_PAGE_REDIS_CACHE_EXPIRES = 7200
 
 # 房屋列表页面每页数据容量
 HOUSE_LIST_PAGE_CAPACITY = 2
+
+
+# ---------------------
+# ---------------------
+# 支付宝 沙箱环境 APID : 2016102700772275
+ALIPAY_APIT_NUMS = "2016102700772275"
+
+# 支付宝 沙箱环境 字符包网关URL常量前缀域名
+ALIPAY_URL_DEV_PRIFIX = "https://openapi.alipaydev.com/gateway.do" + "?"
