@@ -183,7 +183,9 @@ def check_login():
 # 删除session
 @api_1_0.route("/session", methods=["DELETE"])
 def delete_session():
+	csrf_token = session.get("csrf_token")
 	session.clear()
+	session["csrf_token"] = csrf_token
 	return jsonify(errno=RET.OK, errmsg="Delete session OK")
 
 
