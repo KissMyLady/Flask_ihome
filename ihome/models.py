@@ -142,7 +142,7 @@ class House(BaseModel, db.Model):
     def full_info_dict(self):
         house_dict = {
             "hid": self.id,
-            "house_id": self.id,
+            # "house_id": self.id,
             "user_id": self.user_id,
             "user_name": self.user.name,  # user添加了反引用
             "user_avatar": constants.URL_OF_QINIU_IMAGE_PREFIX + self.user.avatar_url if self.user.avatar_url else "",
@@ -157,7 +157,7 @@ class House(BaseModel, db.Model):
             "deposit": self.deposit,            # 存款
             "min_days": self.min_days,
             "max_days": self.max_days,
-            "img_url": self.index_image_url,
+            # "img_url": self.index_image_url,
         }
         # 返回房屋图片
         house_img_all = list()
