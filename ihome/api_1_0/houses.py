@@ -11,6 +11,7 @@ from ihome.utils.commons_self_re_path import login_required
 from ihome import constants
 import json
 from datetime import datetime
+from flask import render_template
 
 
 # 描述: 获取城区分类信息
@@ -298,7 +299,6 @@ def get_house_info():
 def get_house_detail(house_id):
 	"""
 	前端在房屋详情页面展示时，如果浏览页面的用户不是该房屋的房东，则展示预定按钮，否则不展示
-	所以需要后端返回登录用户的user_id
 	"""
 	logging = Use_Loggin()
 	# 尝试获取用户登录的信息，若登录，则返回给前端登录用户的user_id，否则返回user_id=-1
@@ -306,7 +306,7 @@ def get_house_detail(house_id):
 	if not house_id:
 		return jsonify(errno=RET.PARAMERR, errmsg="参数缺失")
 	
-	# 从
+	# 从redis提取数据
 	try:
 		ret = redis_store.get("house_info_%s" % house_id)
 	except Exception as e:
@@ -314,15 +314,15 @@ def get_house_detail(house_id):
 		logging.warning(e)
 	
 	if ret:
-		logging.info("hii house info redis")
+		logging.info("hit house info redis")
 		ret = ret.decode("utf-8")
-		resp = '{"errno"="0", errmsg="OK", "data":{"user_id":%s, "house":%s}}' % (user_id, ret), 200,{
-			"Content-Type": "application/json"}
+		resp = '{"errno"="0", errmsg="OK", "data":{"user_id":%s, "house":%s}}' % (user_id, ret), 200, {"Content-Type": "application/json"}
 		return resp
 	
-	# redis没有数据, 查询数据库
+	# 如果redis没有数据, 查询数据库--用户未登录也会使用sql查询
 	try:
 		house = House.query.get(house_id)  # 查询是不是房东在访问
+		logging.info("缓存无数据, 从sql中提取")
 	except Exception as e:
 		logging.error("数据库查询用户登录信息错误")
 		return jsonify(errno=RET.DBERR, errmsg="查询错误")
@@ -344,7 +344,10 @@ def get_house_detail(house_id):
 	
 	# 前端判断, user_id 与 house_id 是不是同一个
 	resp = '{"errno":"0", errmsg:"OK", "data":{"user_id":%s, "house":%s}}' % (user_id, json_house), 200, {"Content-Type": "application/json"}
-	return resp
+	
+	print("house_data3: ", house_data)
+	print("type(house_data3): ", type(house_data))
+	return render_template("detail_temp.html", **house_data)
 
 
 # 房屋搜索页面
