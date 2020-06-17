@@ -256,6 +256,8 @@ def get_house_info():
 		# logging.info(req_data.decode("utf-8"))
 		req_data = req_data.decode("utf-8")
 		req = '{"errno":0, "errmsg":"OK", "data":%s}' % req_data, 200, {"Content-Type": "application/json"}
+		print("req /house/index:", req)
+		print("req type(req): ", type(req))
 		return req
 
 	else:
@@ -272,6 +274,7 @@ def get_house_info():
 	if not houses:
 		return jsonify(errno=RET.NODATA, errmsg="没有数据")
 	
+	# 有多个房源信息, 用list作为容器,
 	house_img_li = list()
 	for house in houses:
 		# logging.info(house.to_base_dict())
@@ -283,12 +286,12 @@ def get_house_info():
 		house_img_li.append(house.to_base_dict())
 	
 	# 将数据转成json(耗时), 并保存到redis
+	json_houses = json.dumps(house_img_li)  # '[{}, {}, {}]'
 	try:
-		json_houses = json.dumps(house_img_li)  # '[{}, {}, {}]'
 		redis_store.setex("home_page_data", value=json_houses, time=constants.HOME_PATH_REDIS_CACHE_EXPIRES)
 	except Exception as e:
 		logging.error("redis保存缓存失败")
-		
+	
 	# return jsonify(errno=RET.OK, errmsg="OK", data={"data":json_houses}) 耗时
 	req2 = '{"errno"=0, "errmsg"="OK", "data":%s}' % json_houses, 200, {"Content-Type": "application/json"}
 	return req2
@@ -316,7 +319,8 @@ def get_house_detail(house_id):
 	if ret:
 		logging.info("hit house info redis")
 		ret = ret.decode("utf-8")
-		resp = '{"errno"="0", errmsg="OK", "data":{"user_id":%s, "house":%s}}' % (user_id, ret), 200, {"Content-Type": "application/json"}
+		resp = '{"errno"=0, errmsg="OK", "data":{"user_id":%s, "house":%s}}' % (user_id, ret), 200, {"Content-Type": "application/json"}
+		print("/houses/<int:house_id>: hit redis: ", resp)
 		return resp
 	
 	# 如果redis没有数据, 查询数据库--用户未登录也会使用sql查询
@@ -329,7 +333,8 @@ def get_house_detail(house_id):
 	
 	if not house:
 		return jsonify(errno=RET.NODATA, errmsg="数据不存在")
-	
+
+
 	try:
 		house_data = house.full_info_dict()
 	except Exception as e:
@@ -342,12 +347,18 @@ def get_house_detail(house_id):
 	except Exception as e:
 		logging.error("Reids保存缓存错误")
 	
-	# 前端判断, user_id 与 house_id 是不是同一个
-	resp = '{"errno":"0", errmsg:"OK", "data":{"user_id":%s, "house":%s}}' % (user_id, json_house), 200, {"Content-Type": "application/json"}
+	test_li = list()
+	for i in range(25):
+		a = {"%s"%i : "%s"%i}
+		test_li.append(a)
 	
-	print("house_data3: ", house_data)
-	print("type(house_data3): ", type(house_data))
-	return render_template("detail_temp.html", **house_data)
+	test_json = json.dumps(test_li)
+	
+	resq = '{"errno"=0, "errmsg"="OK", "data":{"user_id":%s, "house":%s}}' % (user_id, json_house), 200, {"Content-Type": "application/json"}
+	# return render_template("detail_temp.html", **house_data)  模板渲染方式, 但是返回的是信息, 而不是网页
+	resp2 = '{"errno":"0", "errmsg":"OK", "data":{"user_id":%s, "house":%s, "test_json":%s}}' % (user_id, json_house, test_json), 200, {"Content-Type": "application/json"}
+
+	return resp2  # 返回信息
 
 
 # 房屋搜索页面
