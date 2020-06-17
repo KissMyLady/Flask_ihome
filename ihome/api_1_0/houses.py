@@ -370,11 +370,11 @@ def search_house():
 	sort_key = request.args.get(key="ks", default="new")  # 排序关键字
 	page = request.args.get(key="p", default="")  # 页数
 	
-	print("1 start_date: ", start_date, type(start_date))
-	print("1 end_date: ", end_date, type(end_date))
-	print("1 area_id: ", area_id, type(area_id))
-	print("1 sort_key: ", sort_key, type(sort_key))
-	print("1 page: ",page , type(page))
+	# print("1 start_date: ", start_date, type(start_date))   for test
+	# print("1 end_date: ", end_date, type(end_date))         for test 
+	# print("1 area_id: ", area_id, type(area_id))            for test
+	# print("1 sort_key: ", sort_key, type(sort_key))         for test
+	# print("1 page: ",page , type(page))                     for test
 	
 	# 因为参数可传可不传, 所以这里参数校验没必要
 	
