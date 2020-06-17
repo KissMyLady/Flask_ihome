@@ -315,10 +315,11 @@ def get_house_detail(house_id):
 	except Exception as e:
 		ret = None
 		logging.warning(e)
+	
 	if ret:
 		logging.info("hit house info redis")
 		ret = ret.decode("utf-8")
-		resp = '{"errno"=0, errmsg="OK", "data":{"user_id":%s, "house":%s}}' % (user_id, ret), 200, {"Content-Type": "application/json"}
+		resp = '{"errno":0, errmsg:"OK", "data":{"user_id":%s, "house":%s}}' % (user_id, ret), 200, {"Content-Type": "application/json"}
 		return resp
 	
 	# 如果redis没有数据, 查询数据库--用户未登录也会使用sql查询
@@ -349,6 +350,7 @@ def get_house_detail(house_id):
 	for i in range(25):
 		a = {"%s"%i : "%s"%i}
 		test_li.append(a)
+	
 	test_json = json.dumps(test_li)
 	resp2 = '{"errno":"0", "errmsg":"OK", "data":{"user_id":%s, "house":%s, "test_json":%s}}' % (user_id, json_house, test_json), 200, {"Content-Type": "application/json"}
 	return resp2  # 返回信息
@@ -361,26 +363,34 @@ def search_house():
 	logging = Use_Loggin()
 	
 	# 获取参数, 可有可无
-	start_date = request.args.get(key="sd", default="")   # 用户想要的起始时间
-	end_date = request.args.get(key="ed", default="")     # 结束时间
-	area_id = request.args.get(key="aid", default="")     # 区域编号
+	# http://127.0.0.1:5000/search.html?aid=1&aname=%E4%B8%9C%E5%9F%8E%E5%8C%BA&sd=2020-06-23&ed=2020-07-25
+	start_date = request.args.get(key="sd", default="")   # 用户想要的起始时间  sd=2020-06-23
+	end_date = request.args.get(key="ed", default="")     # 结束时间          ed=2020-07-25
+	area_id = request.args.get(key="aid", default="")     # 区域编号          aname=东城区
 	sort_key = request.args.get(key="ks", default="new")  # 排序关键字
 	page = request.args.get(key="p", default="")  # 页数
 	
+	print("1 start_date: ", start_date, type(start_date))
+	print("1 end_date: ", end_date, type(end_date))
+	print("1 area_id: ", area_id, type(area_id))
+	print("1 sort_key: ", sort_key, type(sort_key))
+	print("1 page: ",page , type(page))
+	
 	# 因为参数可传可不传, 所以这里参数校验没必要
 	
-	try:
-		if start_date:
-			start_date = datetime.strftime(start_date, "%Y-%m-%d")
-			
-		if end_date:
-			end_date = datetime.strftime(end_date, "%Y-%m-%d")
-		
-		if start_date and end_date:
-			assert end_date <= start_date
-			
-	except Exception as e:
-		return jsonify(errno=RET.PARAMERR, errmsg="日期输入有误")
+	# try:
+	# 	if start_date is not None:
+	# 		start_date = datetime.strftime(start_date, "%Y-%m-%d")
+	# 		print("start_date 2: ", start_date)
+	# 	if end_date is not None:
+	# 		end_date = datetime.strftime(end_date, "%Y-%m-%d")
+	# 		print("end_date 2: ", end_date)
+	#
+	# 	if start_date and end_date  is not None:
+	# 		assert end_date <= start_date
+	#
+	# except Exception as e:
+	# 	return jsonify(errno=RET.PARAMERR, errmsg="日期输入有误")
 	
 	# 区域判断
 	try:
@@ -395,7 +405,7 @@ def search_house():
 		page = 1
 	
 	# 查询数据库
-	# 获取缓存数据
+	# 获取缓存数据 存储每个搜索组合, 增加内存开销
 	redis_key = "house_%s_%s_%s_%s" % (start_date, end_date, area_id, sort_key)
 	try:
 		resp_json = redis_store.hget(redis_key, page)
