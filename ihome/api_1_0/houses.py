@@ -315,12 +315,10 @@ def get_house_detail(house_id):
 	except Exception as e:
 		ret = None
 		logging.warning(e)
-	
 	if ret:
 		logging.info("hit house info redis")
 		ret = ret.decode("utf-8")
 		resp = '{"errno"=0, errmsg="OK", "data":{"user_id":%s, "house":%s}}' % (user_id, ret), 200, {"Content-Type": "application/json"}
-		print("/houses/<int:house_id>: hit redis: ", resp)
 		return resp
 	
 	# 如果redis没有数据, 查询数据库--用户未登录也会使用sql查询
@@ -351,13 +349,8 @@ def get_house_detail(house_id):
 	for i in range(25):
 		a = {"%s"%i : "%s"%i}
 		test_li.append(a)
-	
 	test_json = json.dumps(test_li)
-	
-	resq = '{"errno"=0, "errmsg"="OK", "data":{"user_id":%s, "house":%s}}' % (user_id, json_house), 200, {"Content-Type": "application/json"}
-	# return render_template("detail_temp.html", **house_data)  模板渲染方式, 但是返回的是信息, 而不是网页
 	resp2 = '{"errno":"0", "errmsg":"OK", "data":{"user_id":%s, "house":%s, "test_json":%s}}' % (user_id, json_house, test_json), 200, {"Content-Type": "application/json"}
-
 	return resp2  # 返回信息
 
 
