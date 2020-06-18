@@ -23,17 +23,20 @@
             </div>
             <div class="user-info fr"><span><i class="fa fa-user fa-lg"></i></span> <a class="user-name" href="/my.html"></a></div>
         </div>
+
         <div class="swiper-container">
-            <div class="swiper-wrapper">
-            </div>
+
+            <div class="swiper-wrapper"></div>
+
             <script id="swiper-houses-tmpl" type="text/html">
                 {{each houses as house}}
                 <div class="swiper-slide">
-                    <a href="/detail.html?id={{house.house_id}}"><img src="{{house.img_url}}"></a>
+                    <a href="/detail_temp.html?id={{house.house_id}}"><img src="{{house.user_avatar}}"></a>
                     <div class="slide-title">{{house.title}}</div>
                 </div>
                 {{/each}}
             </script>
+
             <div class="swiper-pagination"></div>
         </div>
         <div class="search-bar">
@@ -44,11 +47,13 @@
             <div class="modal fade" id="area-modal" tabindex="-1" role="dialog" aria-labelledby="area-label">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
+
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                             <h4 class="modal-title" id="area-label">选择城区</h4>
                         </div>
                         <div class="modal-body">
+
                             <div class="area-list">
                             </div>
                             <script id="area-list-tmpl" type="text/html">
@@ -56,6 +61,7 @@
                                 <a href="#" area-id="{{area.aid}}">{{area.aname}}</a>
                             {{/each}}
                             </script>
+
                         </div>
                     </div>
                 </div>

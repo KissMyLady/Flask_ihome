@@ -36,6 +36,7 @@
                             <label for="house-price">每晚价格</label>
                             <input type="number" class="form-control" name="price" id="house-price" required>
                         </div>
+
                         <div class="form-group">
                             <label for="area-id">所在城区</label>
                             <select class="form-control" id="area-id" name="area_id">
@@ -46,8 +47,8 @@
                                     <option value="{{ area.aid }}">{{ area.aname }}</option>
                                 {{ /each }}
                             </script>
-
                         </div>
+
                         <div class="fdorm-group">
                             <label for="house-address">详细地址</label>
                             <textarea class="form-control" name="address" id="house-address" required></textarea>

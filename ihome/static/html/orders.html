@@ -33,11 +33,11 @@
                 <li order-id={{order.order_id}}>
                     <div class="order-title">
                         <h3>订单编号：{{order.order_id}}</h3>
-                        {{ if "WAIT_COMMENT" == order.status }}
+                        {{ if order.status == "WAIT_COMMENT"}}
                             <div class="fr order-operate">
                                 <button type="button" class="btn btn-success order-comment" data-toggle="modal" data-target="#comment-modal">发表评价</button>
                             </div>
-                        {{ else if "WAIT_PAYMENT" == order.status }}
+                        {{ else if order.status == "WAIT_PAYMENT"}}
                             <div class="fr order-operate">
                                 <button type="button" class="btn btn-success order-pay">去支付</button>
                             </div>

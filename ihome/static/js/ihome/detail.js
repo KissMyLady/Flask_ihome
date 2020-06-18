@@ -13,19 +13,19 @@ function decodeQuery(){
 }
 
 $(document).ready(function(){
-    // 获取详情页面要展示的房屋编号
+    // 获取房屋编号
     var queryData = decodeQuery();
     var houseId = queryData["id"];
-    // 获取该房屋的详细信息
 
+    // 获取该房屋的详细信息
     $.get("/api/v1.0/houses/"+ houseId, function(resp){
         //校验
         if (resp.errno == "0" || resp.errno == 0) {
             var img_urls = resp.data.house.img_url;
             var price = resp.data.house.price;
             var houses = resp.data.house;
-            var html_one_a = template("house-image-tmpl", {"img_urls": img_urls, "price": price});  //模板渲染有问题
-            var html_two_b = template("house-detail-tmpl", {"house": houses});      //模板渲染有问题
+            var html_one_a = template("house-image-tmpl", {"img_urls": img_urls, "price": price});
+            var html_two_b = template("house-detail-tmpl", {"house": houses});
 
             $(".swiper-container").html(html_one_a);
             $(".detail-con").html(html_two_b);

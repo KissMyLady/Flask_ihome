@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 from datetime import datetime
 from . import db
-from werkzeug.security import  generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from ihome import constants
 
 
@@ -38,10 +38,11 @@ class User(BaseModel, db.Model):
     def password(self, value):
         self.password_hash = generate_password_hash(value)
     
+    # 常规加密方法
     def generate_password_hash(self, origin_pwd):
         '''
         对密码进行加密
-        :return: 字符串, 返回 pwd_hash加密信息
+        :return: 字符串, 返回pwd_hash加密信息
         '''
         self.password_hash = generate_password_hash(origin_pwd)
         
@@ -117,7 +118,7 @@ class House(BaseModel, db.Model):
     deposit =  db.Column(db.Integer, default=0)                # 房屋押金
     min_days = db.Column(db.Integer, default=1)                # 最少入住天数
     max_days = db.Column(db.Integer, default=0)                # 最多入住天数，0表示不限制
-    order_count =     db.Column(db.Integer, default=0)         # 预订完成的该房屋的订单数
+    order_count =     db.Column(db.Integer, default=0)         # 预订完成的该房屋的订单数  冗余字段, 用空间换时间
     index_image_url = db.Column(db.String(256), default="")    # 房屋主图片的路径
     facilities =      db.relationship("Facility", secondary=house_facility)  # 房屋的设施
     images = db.relationship("HouseImage")  # 房屋的图片
@@ -142,7 +143,7 @@ class House(BaseModel, db.Model):
     def full_info_dict(self):
         house_dict = {
             "hid": self.id,
-            # "house_id": self.id,
+            "house_id": self.id,
             "user_id": self.user_id,
             "user_name": self.user.name,  # user添加了反引用
             "user_avatar": constants.URL_OF_QINIU_IMAGE_PREFIX + self.user.avatar_url if self.user.avatar_url else "",
@@ -154,16 +155,16 @@ class House(BaseModel, db.Model):
             "unit": self.unit,
             "capacity": self.capacity,          # 容量
             "beds": self.beds,
-            "deposit": self.deposit,            # 存款
+            "deposit": self.deposit,            # 预付款
             "min_days": self.min_days,
-            "max_days": self.max_days,
-            # "img_url": self.index_image_url,
+            "max_days": self.max_days
+            # "img_url": self.index_image_url,    # 房子图片
         }
         # 返回房屋图片
         house_img_all = list()
         for img in self.images:
             house_img_all.append(constants.URL_OF_QINIU_IMAGE_PREFIX + img.url)
-        house_dict["img_urls"] = house_img_all
+        house_dict["img_url"] = house_img_all
         
         # 返回房屋设施
         house_facilities = list()
@@ -218,8 +219,8 @@ class Order(BaseModel, db.Model):
     house_price = db.Column(db.Integer, nullable=False)   # 房屋的单价
     amount =      db.Column(db.Integer, nullable=False)   # 订单的总金额
     
-    status =      db.Column(  # 订单的状态
-        db.Enum(
+    status = db.Column(      # 订单的状态
+        db.Enum(             # 枚举     # django choice
             "WAIT_ACCEPT",   # 待接单,
             "WAIT_PAYMENT",  # 待支付
             "PAID",          # 已支付
@@ -228,5 +229,19 @@ class Order(BaseModel, db.Model):
             "CANCELED",      # 已取消
             "REJECTED"       # 已拒单
         ),
-        default="WAIT_ACCEPT", index=True)
-    comment = db.Column(db.Text)  # 订单的评论信息或者拒单原因
+        default="WAIT_ACCEPT", index=True)  # 指明在mysql中这个字段建立索引，加快查询速度
+    comment = db.Column(db.Text)            # 订单的评论信息或者拒单原因
+    trade_no = db.Column(db.String(80))     # 交易的流水号 支付宝的 2020061822001403580501092285
+    is_delete = db.Column(db.Boolean, default=False)       # 逻辑删除
+    
+    def to_dict(self):
+        """将订单信息转换为字典数据"""
+        order_dict = {"order_id": self.id,
+                      "title": self.house.title,
+                      "img_url": constants.URL_OF_QINIU_IMAGE_PREFIX + self.house.index_image_url if self.house.index_image_url else "",
+                      "start_date": self.begin_date.strftime("%Y-%m-%d"), "end_date": self.end_date.strftime("%Y-%m-%d"),
+                      "ctime": self.create_time.strftime("%Y-%m-%d %H:%M:%S"), "days": self.days,
+                      "amount": self.amount,
+                      "status": self.status,
+                      "comment": self.comment if self.comment else ""}
+        return order_dict

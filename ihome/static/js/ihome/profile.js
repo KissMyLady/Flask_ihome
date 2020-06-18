@@ -12,9 +12,9 @@ function getCookie(name) {
 }
 
 $(document).ready(function () {
+    //jquery.form.min.js 用插件进行异步提交
     $("#form-avatar").submit(function (e) {
         e.preventDefault(); //阻止浏览器默认提交post请求
-        //jquery.form.min.js 用插件进行异步提交
         $(this).ajaxSubmit({
             url: "/api/v1.0/user/avatar",
             type: "post",
@@ -89,7 +89,8 @@ $(document).ready(function () {
         }
 
         $.ajax({
-            url: "/api/v1.0/user/auth",
+            //url: "/api/v1.0/user/auth",
+            url: "/api/v1.0/user/set_name",
             type: "PUT",
             data: JSON.stringify({name: name}),
             contentType: "application/json",
