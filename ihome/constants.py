@@ -1,8 +1,7 @@
 # coding:utf-8
 # 文件名: Flask_Project_Code -> constants
 # 创建时间: 2020/6/2 16:38
-
-# 保存常量数据
+# 描述: 保存常量数据
 
 
 # 图片验证码信息 单位: 秒
@@ -62,5 +61,5 @@ HOUSE_LIST_PAGE_CAPACITY = 2
 # 支付宝 沙箱环境 APID : 2016102700772275
 ALIPAY_APIT_NUMS = "2016102700772275"
 
-# 支付宝 沙箱环境 字符包网关URL常量前缀域名
+# 支付宝 沙箱环境 字符包网关URL常量前缀域名  线上环境, 把中间的的dev去掉即可
 ALIPAY_URL_DEV_PRIFIX = "https://openapi.alipaydev.com/gateway.do" + "?"
